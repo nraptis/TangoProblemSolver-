@@ -44,6 +44,26 @@ import SwiftUI
                     grid[gridX][gridY].symbol_original = .moon
                     print("Updated Tile \(gridX), \(gridY) to moon")
                 case .test:
+                    
+                    let valid_u = validNeighborsU(gridX, gridY)
+                    let valid_r = validNeighborsR(gridX, gridY)
+                    let valid_d = validNeighborsD(gridX, gridY)
+                    let valid_l = validNeighborsL(gridX, gridY)
+                    
+                    let valid_c_h = validCountsH(gridY: gridY)
+                    let valid_c_v = validCountsV(gridX: gridX)
+                    
+                    let valid_s_h = validStreaksH(gridY: gridY)
+                    let valid_s_v = validStreaksV(gridX: gridX)
+                    
+                    print("Valid, Up @ [\(gridX), \(gridY)]: \(valid_u)")
+                    print("Valid, Right @ [\(gridX), \(gridY)]: \(valid_r)")
+                    print("Valid, Down @ [\(gridX), \(gridY)]: \(valid_d)")
+                    print("Valid, Left @ [\(gridX), \(gridY)]: \(valid_l)")
+                    print("Valid, Count Hor @ [\(gridX), \(gridY)]: \(valid_c_h)")
+                    print("Valid, Count Ver @ [\(gridX), \(gridY)]: \(valid_c_v)")
+                    print("Valid, Streak Hor @ [\(gridX), \(gridY)]: \(valid_s_h)")
+                    print("Valid, Streak Ver @ [\(gridX), \(gridY)]: \(valid_s_v)")
                     break;
                 }
             }
@@ -53,7 +73,6 @@ import SwiftUI
     func clickConnectionH(gridX: Int, gridY: Int) {
         if gridX >= 0 && gridX < width {
             if gridY >= 0 && gridY < height {
-                
                 switch paintConnectionModel {
                 case .none:
                     connectionsH[gridX][gridY].equalityModel = .none
@@ -72,7 +91,6 @@ import SwiftUI
     func clickConnectionV(gridX: Int, gridY: Int) {
         if gridX >= 0 && gridX < width {
             if gridY >= 0 && gridY < height {
-                
                 switch paintConnectionModel {
                 case .none:
                     connectionsV[gridX][gridY].equalityModel = .none
@@ -168,11 +186,11 @@ import SwiftUI
                 let tileModel = grid[x][y]
                 
                 if x < (_width - 1) {
-                        tileModel.connectionR = connectionsH[x][y]
+                    tileModel.connectionR = connectionsH[x][y]
                     
                 }
                 if y < (_height - 1) {
-                        tileModel.connectionD = connectionsV[x][y]
+                    tileModel.connectionD = connectionsV[x][y]
                     
                 }
                 
@@ -201,7 +219,7 @@ import SwiftUI
         print("height_decrease")
         size(width: width, height: height - 1)
     }
-
+    
     var numberOfLoops = 0
     @MainActor func solve() {
         print("solve!")
@@ -224,26 +242,18 @@ import SwiftUI
             }
         } else {
             print("A valid grid was not found! Searched \(numberOfLoops) times!")
-            
         }
     }
     
     func search(_ gridX: Int, _ gridY: Int) -> Bool {
-        
         numberOfLoops += 1
-        
-        
-
         return false
     }
     
     func validBoard() -> Bool {
-
-        
         
         return true
     }
-
     
     func getTile(_ gridX: Int, _ gridY: Int) -> TileModel? {
         if gridX >= 0 && gridX < width && gridY >= 0 && gridY < height {
@@ -251,6 +261,230 @@ import SwiftUI
         }
         return nil
     }
+    
+    func validStreaksH(gridY: Int) -> Bool {
+        if gridY < 0 { return false }
+        if gridY >= height { return false }
+        var gridX = 0
+        var streakSun = 0
+        var streakMoon = 0
+        while gridX < width {
+            if let tile = getTile(gridX, gridY) {
+                let symbol = tile.symbolOrFlag
+                switch symbol {
+                case .none:
+                    break
+                case .moon:
+                    streakSun = 0
+                    streakMoon += 1
+                    if streakMoon >= 3 {
+                        return false
+                    }
+                case .sun:
+                    streakMoon = 0
+                    streakSun += 1
+                    if streakSun >= 3 {
+                        return false
+                    }
+                }
+            }
+            gridX += 1
+        }
+        
+        return true
+    }
+    
+    func validStreaksV(gridX: Int) -> Bool {
+        if gridX < 0 { return false }
+        if gridX >= width { return false }
+        var gridY = 0
+        var streakSun = 0
+        var streakMoon = 0
+        while gridY < height {
+            if let tile = getTile(gridX, gridY) {
+                let symbol = tile.symbolOrFlag
+                switch symbol {
+                case .none:
+                    break
+                case .moon:
+                    streakSun = 0
+                    streakMoon += 1
+                    if streakMoon >= 3 {
+                        return false
+                    }
+                case .sun:
+                    streakMoon = 0
+                    streakSun += 1
+                    if streakSun >= 3 {
+                        return false
+                    }
+                }
+            }
+            gridY += 1
+        }
+        return true
+    }
+    
+    
+    func validCountsH(gridY: Int) -> Bool {
+        if gridY < 0 { return false }
+        if gridY >= height { return false }
+        var gridX = 0
+        var countSun = 0
+        var countMoon = 0
+        while gridX < width {
+            if let tile = getTile(gridX, gridY) {
+                let symbol = tile.symbolOrFlag
+                switch symbol {
+                case .none:
+                    break
+                case .moon:
+                    countMoon += 1
+                case .sun:
+                    countSun += 1
+                }
+            }
+            gridX += 1
+        }
+        if countSun > 3 { return false }
+        if countMoon > 3 { return false }
+        return true
+    }
+    
+    func validCountsV(gridX: Int) -> Bool {
+        if gridX < 0 { return false }
+        if gridX >= width { return false }
+        var gridY = 0
+        var countSun = 0
+        var countMoon = 0
+        while gridY < height {
+            if let tile = getTile(gridX, gridY) {
+                let symbol = tile.symbolOrFlag
+                switch symbol {
+                case .none:
+                    break
+                case .moon:
+                    countMoon += 1
+                case .sun:
+                    countSun += 1
+                }
+            }
+            gridY += 1
+        }
+        if countSun > 3 { return false }
+        if countMoon > 3 { return false }
+        return true
+    }
+    
+    func validNeighborsU(_ gridX: Int, _ gridY: Int) -> Bool {
+        guard gridX >= 0 else { return true }
+        guard gridX < width else { return true }
+        guard gridY >= 1 else { return true }
+        guard gridY < height else { return true }
+        guard let tile1 = getTile(gridX, gridY) else { return false }
+        guard let tile2 = getTile(gridX, gridY - 1) else { return false }
+        let connection = connectionsV[gridX][gridY - 1]
+        let symbol1 = tile1.symbolOrFlag
+        let symbol2 = tile2.symbolOrFlag
+        let equality = connection.equalityModel
+        return validNeighbors(symbol1: symbol1, symbol2: symbol2, equality: equality)
+    }
+    
+    func validNeighborsD(_ gridX: Int, _ gridY: Int) -> Bool {
+        guard gridX >= 0 else { return true }
+        guard gridX < width else { return true }
+        guard gridY >= 0 else { return true }
+        guard gridY < (height - 1) else { return true }
+        guard let tile1 = getTile(gridX, gridY) else { return false }
+        guard let tile2 = getTile(gridX, gridY + 1) else { return false }
+        let connection = connectionsV[gridX][gridY]
+        let symbol1 = tile1.symbolOrFlag
+        let symbol2 = tile2.symbolOrFlag
+        let equality = connection.equalityModel
+        return validNeighbors(symbol1: symbol1, symbol2: symbol2, equality: equality)
+    }
+    
+    func validNeighborsR(_ gridX: Int, _ gridY: Int) -> Bool {
+        guard gridX >= 0 else { return true }
+        guard gridX < (width - 1) else { return true }
+        guard gridY >= 0 else { return true }
+        guard gridY < height else { return true }
+        guard let tile1 = getTile(gridX, gridY) else { return false }
+        guard let tile2 = getTile(gridX + 1, gridY) else { return false }
+        let connection = connectionsH[gridX][gridY]
+        let symbol1 = tile1.symbolOrFlag
+        let symbol2 = tile2.symbolOrFlag
+        let equality = connection.equalityModel
+        return validNeighbors(symbol1: symbol1, symbol2: symbol2, equality: equality)
+    }
+    
+    func validNeighborsL(_ gridX: Int, _ gridY: Int) -> Bool {
+        guard gridX >= 1 else { return true }
+        guard gridX < width else { return true }
+        guard gridY >= 0 else { return true }
+        guard gridY < height else { return true }
+        guard let tile1 = getTile(gridX, gridY) else { return false }
+        guard let tile2 = getTile(gridX - 1, gridY) else { return false }
+        let connection = connectionsH[gridX - 1][gridY]
+        let symbol1 = tile1.symbolOrFlag
+        let symbol2 = tile2.symbolOrFlag
+        let equality = connection.equalityModel
+        return validNeighbors(symbol1: symbol1, symbol2: symbol2, equality: equality)
+    }
+    
+    func validNeighbors(symbol1: SymbolModel, symbol2: SymbolModel, equality: EqualityModel) -> Bool {
+        switch equality {
+        case .none:
+            return true
+        case .same:
+            switch symbol1 {
+            case .none:
+                return true
+            case .moon:
+                switch symbol2 {
+                case .none:
+                    return true
+                case .moon:
+                    return true
+                case .sun:
+                    return false
+                }
+            case .sun:
+                switch symbol2 {
+                case .none:
+                    return true
+                case .moon:
+                    return false
+                case .sun:
+                    return true
+                }
+            }
+        case .opposite:
+            switch symbol1 {
+            case .none:
+                return true
+            case .moon:
+                switch symbol2 {
+                case .none:
+                    return true
+                case .moon:
+                    return false
+                case .sun:
+                    return true
+                }
+            case .sun:
+                switch symbol2 {
+                case .none:
+                    return true
+                case .moon:
+                    return true
+                case .sun:
+                    return false
+                }
+            }
+        }
+    }
+    
 }
 
 extension ViewModel {

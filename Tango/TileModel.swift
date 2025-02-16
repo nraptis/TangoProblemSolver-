@@ -19,6 +19,24 @@ import Foundation
     
     @ObservationIgnored var flag = SymbolModel.none
     
+    var symbolOrFlag: SymbolModel {
+        switch symbol_original {
+        case .none:
+            switch flag {
+            case .none:
+                return .none
+            case .moon:
+                return .moon
+            case .sun:
+                return .sun
+            }
+        case .moon:
+            return .moon
+        case .sun:
+            return .sun
+        }
+    }
+    
     // From *THIS* tile to the *RIGHT* tile.
     weak var connectionR: ConnectionModel?
     
