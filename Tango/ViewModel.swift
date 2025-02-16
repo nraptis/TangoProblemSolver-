@@ -49,10 +49,8 @@ import SwiftUI
                     let valid_r = validNeighborsR(gridX, gridY)
                     let valid_d = validNeighborsD(gridX, gridY)
                     let valid_l = validNeighborsL(gridX, gridY)
-                    
                     let valid_c_h = validCountsH(gridY: gridY)
                     let valid_c_v = validCountsV(gridX: gridX)
-                    
                     let valid_s_h = validStreaksH(gridY: gridY)
                     let valid_s_v = validStreaksV(gridX: gridX)
                     
@@ -184,16 +182,12 @@ import SwiftUI
         for x in 0..<_width {
             for y in 0..<_height {
                 let tileModel = grid[x][y]
-                
                 if x < (_width - 1) {
                     tileModel.connectionR = connectionsH[x][y]
-                    
                 }
                 if y < (_height - 1) {
                     tileModel.connectionD = connectionsV[x][y]
-                    
                 }
-                
             }
         }
         
@@ -246,13 +240,64 @@ import SwiftUI
     }
     
     func search(_ gridX: Int, _ gridY: Int) -> Bool {
-        numberOfLoops += 1
-        return false
-    }
-    
-    func validBoard() -> Bool {
         
-        return true
+        numberOfLoops += 1
+        
+        if gridY >= height {
+            
+            for x in 0..<width {
+                for y in 0..<height {
+                    if !validAll(x, y) {
+                        return false
+                    }
+                }
+            }
+            return true
+        }
+        
+        if let tileModel = getTile(gridX, gridY) {
+            
+            var nextGridX = gridX + 1
+            var nextGridY = gridY
+            if nextGridX >= width {
+                nextGridX = 0
+                nextGridY += 1
+            }
+            
+            // If it's already a fixed symbol, skip it...
+            switch tileModel.symbol_original {
+            case .none:
+                break
+            case .moon, .sun:
+                if search(nextGridX, nextGridY) {
+                    return true
+                } else {
+                    return false
+                }
+            }
+            
+            // 1.) Try as sun.
+            tileModel.flag = .sun
+
+            if validAll(gridX, gridY) {
+                if search(nextGridX, nextGridY) {
+                    return true
+                }
+            }
+            
+            // 2.) Try as moon.
+            tileModel.flag = .moon
+            if validAll(gridX, gridY) {
+                if search(nextGridX, nextGridY) {
+                    return true
+                }
+            }
+            
+            // 3.) Neither has worked, not a valid branch to keep exploting.
+            //     We reset the symbol, and then can continue the hunt.
+            tileModel.flag = .none
+        }
+        return false
     }
     
     func getTile(_ gridX: Int, _ gridY: Int) -> TileModel? {
@@ -260,6 +305,18 @@ import SwiftUI
             return grid[gridX][gridY]
         }
         return nil
+    }
+
+    func validAll(_ gridX: Int, _ gridY: Int) -> Bool {
+        if !validNeighborsU(gridX, gridY) { return false }
+        if !validNeighborsR(gridX, gridY) { return false }
+        if !validNeighborsD(gridX, gridY) { return false }
+        if !validNeighborsL(gridX, gridY) { return false }
+        if !validCountsH(gridY: gridY) { return false }
+        if !validCountsV(gridX: gridX) { return false }
+        if !validStreaksH(gridY: gridY) { return false }
+        if !validStreaksV(gridX: gridX) { return false }
+        return true
     }
     
     func validStreaksH(gridY: Int) -> Bool {
@@ -273,7 +330,8 @@ import SwiftUI
                 let symbol = tile.symbolOrFlag
                 switch symbol {
                 case .none:
-                    break
+                    streakSun = 0
+                    streakMoon = 0
                 case .moon:
                     streakSun = 0
                     streakMoon += 1
@@ -305,7 +363,8 @@ import SwiftUI
                 let symbol = tile.symbolOrFlag
                 switch symbol {
                 case .none:
-                    break
+                    streakSun = 0
+                    streakMoon = 0
                 case .moon:
                     streakSun = 0
                     streakMoon += 1
