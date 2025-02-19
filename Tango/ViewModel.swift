@@ -544,6 +544,18 @@ import SwiftUI
         }
     }
     
+    func clear() {
+        for x in 0..<width {
+            for y in 0..<height {
+                grid[x][y].flag = .none
+                grid[x][y].symbol_original = .none
+                grid[x][y].symbol_discovered = .none
+                connectionsH[x][y].equalityModel = .none
+                connectionsV[x][y].equalityModel = .none
+            }
+        }
+    }
+    
 }
 
 extension ViewModel {
