@@ -9,7 +9,7 @@ import SwiftUI
 
 @Observable class ViewModel {
     
-    var paintModel = PaintModel.test
+    var paintModel = PaintModel.sun
     var paintConnectionModel = EqualityModel.none
     
     init() {
